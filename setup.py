@@ -45,6 +45,8 @@ setup(
     entry_points={
         'console_scripts': [
             'alars_yolo_detector = alars_auv_perception.alars_yolo_detector:main',
+            'alars_video_publisher = alars_auv_perception.alars_video_publisher:main',
+
         ],
     },
 )

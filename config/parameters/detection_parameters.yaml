@@ -8,10 +8,7 @@
       inference_period: 0.1
       confidence_threshold: 0.4
       multiple_other_detections: true
-      #iou_threshold: 0.5
-      #max_detections: 50
 
-      # optional, useful if want to prioritize classes
       per_class_confidence:
         sam: 0.45
         buoy: 0.35
@@ -21,7 +18,6 @@
       keep_best_per_class: true
 
     sam:
-      #class_id: 0
       width: 0.2
       length: 1.5
       enable_head_detection: true

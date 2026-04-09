@@ -25,6 +25,13 @@ from dji_msgs.msg import Topics, Links
 
 
 class YOLODetector(Node):
+    """ROS 2 node for YOLO-based object detection in AUV perception.
+
+    This node subscribes to camera images, runs YOLO inference to detect objects
+    such as SAM, buoys, and other classes, and publishes detection results including
+    positions, oriented bounding boxes, and annotated images for visualization.
+    """
+
     def __init__(self, name='alars_yolo_detector'):
         super().__init__(
             name,

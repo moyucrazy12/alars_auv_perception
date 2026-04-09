@@ -10,6 +10,12 @@ from cv_bridge import CvBridge
 
 
 class VideoImagePublisher(Node):
+    """ROS 2 node for publishing video frames as ROS Image messages.
+
+    This node reads a video file and publishes its frames as ROS Image messages
+    at a specified rate, with options for looping, resizing, and pausing.
+    """
+
     def __init__(self):
         super().__init__(
             'alars_video_publisher',

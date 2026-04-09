@@ -1,18 +1,9 @@
-# YOLO Detection
+# ALARS AUV Perception
 
 ## Overview
-This package uses YOLO to detect **SAM**, **buoys**, and other classes such as **Lolo**, **catamarans**, and **boats**.
+This package uses YOLO to detect **SAM**, **buoys**, and other classes such as **Lolo**, **Catamaran**, and **boats**. The YOLO models with real and sim data can be found in detail in the following repository [alars_labeling_training](https://github.com/moyucrazy12/alars_labeling_training.git), where can be found as well the annotation and training pipeline followed to obtain the models.
 
-The annotation and training pipeline is maintained in a separate repository:  
-[alars_labeling_training](https://github.com/moyucrazy12/alars_labeling_training.git)
-
-That repository also documents the trained models currently available for use in this pipeline.
-
-The classes to detect, as well as their corresponding confidence thresholds, can be configured in:
-
-```yaml
-config/detection_parameters.yaml
-```
+Additionally, the package detects the SAM's head using a Canny edge detector, which assumes the presence of a rope attached to the SAM.
 
 ---
 
@@ -32,21 +23,27 @@ When installing **Ultralytics**, some dependencies such as **PyTorch** and **Ope
 ---
 
 ## Package Setup
-Before using the package, make sure to build the workspace:
 
-```bash
-cd [ws_path]
-colcon build --symlink-install --packages-select alars_auv_perception
-source install/setup.sh
-```
-
-The trained models can be downloaded from:  
-[alars_labeling_training](https://github.com/moyucrazy12/alars_labeling_training.git)
+Before using the package, make sure to check the trained models that can be downloaded from: [alars_labeling_training](https://github.com/moyucrazy12/alars_labeling_training.git)
 
 Place the model file(s) in:
 
 ```bash
 config/models/
+```
+
+As well, the classes to detect, with their corresponding confidence thresholds, can be configured in:
+
+```yaml
+config/detection_parameters.yaml
+```
+
+Then, remember to build the workspace with this new package:
+
+```bash
+cd [ws_path]
+colcon build --symlink-install --packages-select alars_auv_perception
+source install/setup.sh
 ```
 
 ---
@@ -55,13 +52,21 @@ config/models/
 
 ### 1. Launch only the YOLO detector
 ```bash
-ros2 launch alars_auv_perception alars_yolodetector.launch.py namespace:=M350 device:=cpu use_sim_time:=true model_file:=yolo_model_4cls.pt
+ros2 launch alars_auv_perception alars_yolo_detector.launch.py namespace:=M350 device:=cpu use_sim_time:=true model_file:=<model_name>
 ```
+
+If CPU inference is too slow, consider using a GPU instead by setting:
+
+```bash
+device:=0
+```
+
+or another available GPU device (consider this step for all the following examples).
 
 To open the RViz configuration file:
 
 ```bash
-rviz2 -d <absolute_path>/perception/alars/auv_yolo_detector/config/M350_yolo.rviz
+rviz2 -d <absolute_path>/perception/alars/alars_auv_perception/config/rviz/M350_perception.rviz
 ```
 
 ---
@@ -76,14 +81,6 @@ For video playback, it is recommended to use:
 ```bash
 use_sim_time:=false
 ```
-
-If CPU inference is too slow, consider using a GPU instead by setting:
-
-```bash
-device:=0
-```
-
-or another available GPU device.
 
 To change the input video, edit the path in:
 
@@ -138,22 +135,15 @@ may need adjustment depending on the scene. Ideally, waves should not generate e
 | `/namespace/alars_detection/auv_head` | `PolygonStamped` | Estimated head/front region of the detected SAM/AUV. |
 | `/namespace/alars_detection/buoy` | `PointStamped` | Estimated position of the detected buoy. |
 | `/namespace/alars_detection/buoy_obb` | `PolygonStamped` | Oriented bounding box of the detected buoy. |
-| `/namespace/estimated_other_obbs` | `PolygonStamped`* | Oriented bounding boxes for other detected classes. |
-
-\* Adjust the message type if `estimated_other_obbs` uses a different message.
+| `/namespace/estimated_other_obbs` | `PolygonStamped` | Oriented bounding boxes for other detected classes. |
 
 ---
 
 ## Labeling and Training Pipeline
 
-If you also want to use the labeling and training pipeline, see:  
-[alars_labeling_training](https://github.com/moyucrazy12/alars_labeling_training.git)
+If you also want to use the labeling and training pipeline, see: [alars_labeling_training](https://github.com/moyucrazy12/alars_labeling_training.git). This pipeline is kept separate from the ROS 2 perception pipeline and is intended only for annotation and training tasks.
 
-This pipeline is kept separate from the ROS 2 perception pipeline and is intended only for annotation and training tasks.
-
-It is separated because it depends on **Segment Anything Model 2 and 3**, and typically requires two different Conda environments to avoid dependency conflicts with the main perception pipeline.
-
-You can find its installation instructions in the corresponding repository under the add-ons section.
+Therefore it is separated because it depends on **Segment Anything Model 2 and 3**, and typically requires two different Conda environments to avoid dependency conflicts with the main perception pipeline. You can find its installation instructions in the corresponding repository, but it is suggested to be included in the add-ons folder.
 
 ---
 

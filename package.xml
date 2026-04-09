@@ -4,7 +4,7 @@
   <name>alars_auv_perception</name>
   <version>0.0.0</version>
   <description>ROS2 package for the ALARS perception pipeline</description>
-  <maintainer email="ckmc@kth.se">Cristhian</maintainer>
+  <maintainer email="ckmc@kth.se">Cristhian Mallqui Castro</maintainer>
   <license>MIT</license>
 
   <test_depend>ament_copyright</test_depend>

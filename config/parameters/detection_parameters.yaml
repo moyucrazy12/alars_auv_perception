@@ -7,6 +7,7 @@
       blur_variance: 1.5
       inference_period: 0.1
       confidence_threshold: 0.4
+      multiple_other_detections: true
       #iou_threshold: 0.5
       #max_detections: 50
 
@@ -20,14 +21,11 @@
       keep_best_per_class: true
 
     sam:
-      class_id: 0
+      #class_id: 0
       width: 0.2
       length: 1.5
       enable_head_detection: true
       lw_ratio_margin: 4.0
-
-    buoy:
-      class_id: 1
 
     classes:
       names: ["sam", "buoy", "lolo", "catamaran", "boat"]
@@ -41,5 +39,6 @@
       predicted_position:
         sam: "estimated_sam"
         buoy: "estimated_buoy"
+        other_obbs: "estimated_other_obbs"
 
       raw_image: "camera/image_raw"

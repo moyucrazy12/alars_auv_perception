@@ -5,6 +5,6 @@
     frame_id: "gimbal_optical_frame"
     loop_video: true
     start_paused: false
-    publish_fps: 10.0
+    publish_fps: 120.0
     resize_width: 640
     resize_height: 480

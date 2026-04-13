@@ -17,18 +17,18 @@ from ultralytics import YOLO
 from ultralytics.engine.results import OBB, Results
 
 from sensor_msgs.msg import Image
-from geometry_msgs.msg import PointStamped, PolygonStamped, Point32
+from geometry_msgs.msg import PointStamped, PolygonStamped, Point32, Polygon
 from std_msgs.msg import Bool
 from std_srvs.srv import Trigger
 
-from dji_msgs.msg import Topics, Links
+from dji_msgs.msg import Topics, Links, LabeledOBBs
 
 
 class YOLODetector(Node):
     """ROS 2 node for YOLO-based object detection in AUV perception.
 
     This node subscribes to camera images, runs YOLO inference to detect objects
-    such as SAM, buoys, and other classes, and publishes detection results including
+    such as sam, buoy, and other classes, and publishes detection results including
     positions, oriented bounding boxes, and annotated images for visualization.
     """
 
@@ -51,8 +51,6 @@ class YOLODetector(Node):
         self.dircount = []
         self.horizon = 10
 
-        #self.sam_class_id = int(self.model_params["sam.class_id"])
-        #self.buoy_class_id = int(self.model_params["buoy.class_id"])
         self.class_names = list(self.model_params["classes.names"])
         self.class_name_to_id = {name: idx for idx, name in enumerate(self.class_names)}
         self.sam_class_id = self.class_name_to_id["sam"]
@@ -108,7 +106,7 @@ class YOLODetector(Node):
             10
         )
         self.other_obbs_pub = self.create_publisher(
-            PolygonStamped,
+            LabeledOBBs,
             self.model_params["topics.predicted_position.other_obbs"],
             10
         )
@@ -247,7 +245,7 @@ class YOLODetector(Node):
         self.annotated_img_pub.publish(ros_img)
 
         self.get_logger().info(
-            f"Detections -> SAM: {len(sam_detections)}, buoy: {len(buoy_detections)}, head: {head}"
+            f"Detections -> sam: {len(sam_detections)}, buoy: {len(buoy_detections)}, head: {head}"
         )
 
     def get_best_detection_index_for_class(self, obb: OBB, class_id: int):
@@ -469,9 +467,9 @@ class YOLODetector(Node):
             self.get_logger().error(f'Label not recognized: {label}')
 
     def publish_other_obbs(self, detections: Dict[str, List[dict]], wh: tuple):
-        poly = PolygonStamped()
-        poly.header.stamp = self.image.header.stamp
-        poly.header.frame_id = self.model_params["frames.camera"]
+        msg = LabeledOBBs()
+        msg.header.stamp = self.image.header.stamp
+        msg.header.frame_id = self.model_params["frames.camera"]
 
         w, h = wh
         for class_name, det_list in detections.items():
@@ -479,15 +477,18 @@ class YOLODetector(Node):
                 continue
 
             for det in det_list:
+                poly = Polygon()
                 for px, py in det["corners"]:
                     p = Point32()
                     p.x = float((px - w / 2) / (w / 2))
                     p.y = float((py - h / 2) / (h / 2))
-                    p.z = float(det["class_id"])
-                    poly.polygon.points.append(p)
+                    poly.points.append(p)
 
-        if len(poly.polygon.points) > 0:
-            self.other_obbs_pub.publish(poly)
+                msg.obbs.append(poly)
+                msg.ids.append(class_name)
+
+        if len(msg.obbs) > 0:
+            self.other_obbs_pub.publish(msg)
 
     def handle_enable_detector(self, request, response):
         self.detector_enabled = True
@@ -520,10 +521,7 @@ class YOLODetector(Node):
 
             "sam.width": (float, int),
             "sam.length": (float, int),
-            #"sam.class_id": int,
             "sam.lw_ratio_margin": (float, int),
-
-            #"buoy.class_id": int,
 
             "classes.names": list,
 
@@ -558,7 +556,7 @@ class YOLODetector(Node):
             "topics.predicted_position.sam_head": namespace + "/" + Topics.ESTIMATED_AUV_HEAD_TOPIC,
             "topics.predicted_position.buoy": namespace + "/" + Topics.ESTIMATED_BUOY_TOPIC,
             "topics.predicted_position.buoy_obb": namespace + "/" + Topics.ESTIMATED_BUOY_OBB_TOPIC,
-            "topics.predicted_position.other_obbs": namespace + "/estimated_other_obbs",
+            "topics.predicted_position.other_obbs": namespace + "/" + Topics.LABELED_OBBS_TOPIC,
             "topics.raw_image": namespace + "/" + Topics.GIMBAL_CAMERA_RAW_TOPIC,
 
             "frames.map": namespace.removeprefix("/") + "/" + Links.MAP,

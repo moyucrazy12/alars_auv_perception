@@ -20,14 +20,19 @@ def generate_launch_description():
         'use_sim_time',
         default_value='false'
     )
+    model_package_arg = DeclareLaunchArgument(
+        'model_package',
+        default_value=package_name
+    )
     model_file_arg = DeclareLaunchArgument(
         'model_file',
-        default_value='yolo_model_4cls.pt'
+        default_value='yolo_model_5cls.pt'
     )
 
     namespace = LaunchConfiguration('namespace')
     device = LaunchConfiguration('device')
     use_sim_time = LaunchConfiguration('use_sim_time')
+    model_package = LaunchConfiguration('model_package')
     model_file = LaunchConfiguration('model_file')
 
     detection_config = PathJoinSubstitution([
@@ -38,9 +43,8 @@ def generate_launch_description():
     ])
 
     model_path = PathJoinSubstitution([
-        FindPackageShare(package_name),
-        'config',
-        'models',
+        FindPackageShare(model_package),
+        'trained_models',
         model_file
     ])
 
@@ -64,10 +68,12 @@ def generate_launch_description():
         namespace_arg,
         device_arg,
         use_sim_time_arg,
+        model_package_arg,
         model_file_arg,
         LogInfo(msg=['[Launch] namespace = ', namespace]),
         LogInfo(msg=['[Launch] device = ', device]),
         LogInfo(msg=['[Launch] use_sim_time = ', use_sim_time]),
+        LogInfo(msg=['[Launch] model package = ', model_package]),
         LogInfo(msg=['[Launch] model path = ', model_path]),
         detector_node,
     ])

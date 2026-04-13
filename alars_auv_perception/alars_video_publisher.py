@@ -33,9 +33,11 @@ class VideoImagePublisher(Node):
         self.resize_height = int(self._require_param('resize_height'))
         self.paused = bool(self._require_param('start_paused'))
 
-        ros_ns = self.get_namespace().strip('/')
         self.image_topic = self._resolve_topic(raw_image_topic)
-        self.frame_id = f"{ros_ns}/{str(raw_frame_id).strip('/')}" if ros_ns else str(raw_frame_id).strip('/')
+        self.frame_id = str(raw_frame_id).strip('/')
+
+        if not self.frame_id:
+            raise ValueError("Parameter 'frame_id' cannot be empty.")
 
         if not self.video_path:
             raise ValueError("Parameter 'video_path' is empty.")

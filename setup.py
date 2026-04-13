@@ -19,6 +19,10 @@ def get_data_files():
             os.path.join('share', package_name, 'launch'),
             glob('launch/*.launch.py'),
         ),
+        (
+            os.path.join('share', package_name, 'trained_models'),
+            glob('trained_models/*'),
+        ),
     ]
 
     for root, _, files in os.walk('config'):
@@ -46,7 +50,6 @@ setup(
         'console_scripts': [
             'alars_yolo_detector = alars_auv_perception.alars_yolo_detector:main',
             'alars_video_publisher = alars_auv_perception.alars_video_publisher:main',
-
         ],
     },
 )

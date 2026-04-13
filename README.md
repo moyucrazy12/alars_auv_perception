@@ -24,14 +24,23 @@ When installing **Ultralytics**, some dependencies such as **PyTorch** and **Ope
 
 ## Package Setup
 
-Before using the package, make sure to check the trained models that can be downloaded from: [alars_labeling_training](https://github.com/moyucrazy12/alars_labeling_training.git)
+Before using the package, make sure to check the trained models that can be obtained from the submodule: [alars_labeling_training](https://github.com/moyucrazy12/alars_labeling_training.git)
 
-Place the model file(s) in:
-
+#### Option 1 — Local models
+In case, you want to try your own models or manual configuration, place models in:
 ```bash
-config/models/
+trained_models/
 ```
 
+#### Option 2 — Training package (recommended)
+You can use the training package which has already all the current trained models:
+```bash
+alars_labeling_training
+```
+
+Models will be resolved automatically via ROS packages.
+
+### Detection Configuration
 As well, the classes to detect, with their corresponding confidence thresholds, can be configured in:
 
 ```yaml
@@ -46,13 +55,29 @@ colcon build --symlink-install --packages-select alars_auv_perception
 source install/setup.sh
 ```
 
+With training package:
+
+```bash
+cd [ws_path]
+colcon build --symlink-install --packages-select alars_auv_perception alars_labeling_training
+source install/setup.sh
+```
+
 ---
 
 ## Launch YOLO Detector
 
 ### 1. Launch only the YOLO detector
+
+#### Basic
 ```bash
 ros2 launch alars_auv_perception alars_yolo_detector.launch.py namespace:=M350 device:=cpu use_sim_time:=true model_file:=<model_name>
+```
+
+### Using external model package
+
+```bash
+ros2 launch alars_auv_perception alars_yolo_detector.launch.py namespace:=M350 device:=cpu use_sim_time:=true model_package:=alars_labeling_training model_file:=<model_name>
 ```
 
 If CPU inference is too slow, consider using a GPU instead by setting:
@@ -72,8 +97,16 @@ rviz2 -d <absolute_path>/perception/alars/alars_auv_perception/config/rviz/M350_
 ---
 
 ### 2. Launch the YOLO detector with a video
+
+#### Basic
 ```bash
 ros2 launch alars_auv_perception alars_video_yolo_detector.launch.py namespace:=M350 device:=cpu use_sim_time:=false
+```
+
+### Using external model package
+
+```bash
+ros2 launch alars_auv_perception alars_video_yolo_detector.launch.py namespace:=M350 device:=cpu use_sim_time:=false model_package:=alars_labeling_training model_file:=<model_name>
 ```
 
 For video playback, it is recommended to use:
@@ -91,8 +124,16 @@ config/video_publisher_parameters.yaml
 ---
 
 ### 3. Launch the YOLO detector with a rosbag
+
+#### Basic
 ```bash
 ros2 launch alars_auv_perception alars_rosbag_yolo_detector.launch.py namespace:=M350 device:=cpu use_sim_time:=false
+```
+
+### Using external model package
+
+```bash
+ros2 launch alars_auv_perception alars_rosbag_yolo_detector.launch.py namespace:=M350 device:=cpu use_sim_time:=false model_package:=alars_labeling_training model_file:=<model_name>
 ```
 
 ---
